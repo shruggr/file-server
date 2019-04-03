@@ -129,7 +129,8 @@ async function processTransaction(m, txn) {
 
         let i = 7;
         let chunkId;
-        while (chunkId = opRet[`h${i}`] && /^[0-9A-Fa-f]{64}$/g.test(chunkId)) {
+        while (chunkId = opRet[`h${i}`]) {
+          if(!/^[0-9A-Fa-f]{64}$/g.test(chunkId)) return;
           bcat.chunks.push(chunkId);
           i++;
         }
