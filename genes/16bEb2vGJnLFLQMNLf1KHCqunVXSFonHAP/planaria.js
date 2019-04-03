@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const lmdb = require('node-lmdb');
 let en = new lmdb.Env();
 let db;
+let fspath;
 
 async function readFile(path) {
   return new Promise((resolve, reject) => {
@@ -47,48 +48,113 @@ async function exists(path) {
   })
 }
 
+async function save(buffer) {
+  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
+  const filePath = `${fspath}/files/${hash}`;
+  console.log("Saving C: ", hash);
+  await writeFile(filePath, buffer);
+  return hash;
+}
+
+async function saveB(txId, opRet) {
+  console.log(`Processing B: ${txId}`);
+  buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
+  const fileData = {
+    info: 'b',
+    contentType: opRet.s3,
+    encoding: opRet.s4,
+    filename: opRet.s5
+  };
+  const hash = await save(buffer);
+  await saveMetadata(hash, fileData);
+
+  const filepath = `${m.fs.path}/files/${hash}`;
+  console.log("Saving B: ", txId)
+  const bPath = `${m.fs.path}/files/${txId}`;
+  await linkFile(filepath, bPath);
+  await saveMetadata(txId, fileData);
+}
+
+async function saveChunk(txId, opRet) {
+  const filepath = `${fspath}/chunks/${bcat.txId}`;
+  if(await exists(filepath)) return;
+
+  console.log(`Processing Chunk: ${txId}`);
+  const buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
+  await writeFile(filepath, buffer);
+}
+
+async function saveBCat(bcat) {
+  if(await exists(`${fspath}/file/${bcat.txId}`)) return;
+  for(let chunkId of bcat.chunks) {
+    if (! await exists(`${fspath}/chunks/${chunkId}`)) return;
+  }
+
+  let buffer = Buffer.alloc(0);
+  for(let chunkId of bcat.chunks) {
+    buffer = buffer.concat(await readFile(`${fspath}/chunks/${chunkId}`));
+  }
+
+  const hash = await save(buffer);
+  await saveMetadata(hash, bcat.fileData);
+
+  const filepath = `${m.fs.path}/files/${hash}`;
+  console.log("Saving BCAT: ", txId)
+  const bPath = `${m.fs.path}/files/${txId}`;
+  await linkFile(filepath, bPath);
+  await saveMetadata(txId, bcat.fileData);
+}
+
 async function processTransaction(m, txn) {
   const opRet = txn.out.find((out) => out.b0.op == 106);
   if (!opRet) return;
-  let buffer;
   let fileData;
   let bTxId;
   try {
     switch (opRet.s1) {
-      case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
-        console.log(`Processing B: ${txn.tx.h}`);
-        bTxId = txn.tx.h;
-        buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
-        fileData = {
-          info: 'b',
-          contentType: opRet.s3,
-          encoding: opRet.s4,
-          filename: opRet.s5
-        };
-        break;
+      // case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
+      //   return saveB(txn.tx.h, opRet);
+      //   break;
       case '15DHFxWZJT58f9nhyGnsRBqrgwK4W6h4Up':
         console.log(`Processing BCAT: ${txn.tx.h}`);
-        bTxId = txn.tx.h;
-        buffer = Buffer.alloc(0);
-        fileData = {
-          info: opRet.s2,
-          contentType: opRet.s3,
-          encoding: opRet.s4,
-          filename: opRet.s5
-        }
+        const bcat = {
+          txId: txn.tx.h,
+          chunks: [],
+          fileData: {
+            info: opRet.s2,
+            contentType: opRet.s3,
+            encoding: opRet.s4,
+            filename: opRet.s5
+          }
+        };
 
         let i = 7;
         let chunkId;
         while (chunkId = opRet[`lh${i}`] && /^[0-9A-Fa-f]{64}$/g.test(chunkId)) {
-          const chunkPath = `${m.fs.path}/files/${chunkId}`;
-          if (! await exists(chunkPath)) return;
-          buffer = buffer.concat(await readFile(chunkPath));
+          bcat.chunks.push(chunkId);
           i++;
         }
+
+        await m.create({
+          name: 'bcat',
+          data: bcat
+        }).catch(function (e) {
+          if (e.code != 11000) {
+            process.exit();
+          }
+        });
+        console.log('Saving BCAT index: ' + txn.tx.h);
+        return saveBCat(bcat);
         break;
       case '1ChDHzdd1H4wSjgGMHyndZm6qxEDGjqpJL':
-        console.log(`Processing BCAT chunk: ${txn.tx.h}`);
-        buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
+        await saveChunk(txn.tx.h, opRet);
+        const {bcat} = await m.state.read({
+          name: 'bcat',
+          filter: {find: {chunks: txn.tx.h}}
+        });
+        if(bcat) {
+          return saveBCat(bcat);
+        }
         break;
       default:
         return;
@@ -96,21 +162,6 @@ async function processTransaction(m, txn) {
   }
   catch (e) {
     return;
-  }
-  const hash = crypto.createHash('sha256').update(buffer).digest('hex');
-  const filePath = `${m.fs.path}/files/${hash}`;
-  console.log("Saving C: ", hash)
-  await writeFile(filePath, buffer);
-
-  if (bTxId) {
-    console.log("Saving B/BCAT: ", bTxId)
-    const bPath = `${m.fs.path}/files/${bTxId}`;
-    await linkFile(filePath, bPath);
-  }
-
-  if (fileData) {
-    await saveMetadata(hash, fileData);
-    if (bTxId) await saveMetadata(bTxId, fileData);
   }
 }
 
@@ -132,12 +183,14 @@ module.exports = {
   description: 'file server for b, c, bcat, and ccat files',
   address: '16bEb2vGJnLFLQMNLf1KHCqunVXSFonHAP',
   index: {
-    m: {
-      keys: ['id'],
-      unique: ['id']
+    bcat: {
+      keys: ['txId', 'chunks'],
+      unique: ['txId']
     }
   },
   oncreate: async function (m) {
+    fspath = m.fs.path;
+    await mkdir(m.fs.path + "/chunks");
     await mkdir(m.fs.path + "/files");
     await mkdir(m.fs.path + "/lmdb");
     initLMDB(m);
