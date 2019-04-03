@@ -5,6 +5,7 @@
   "main": "planaria.js",
   "license": "ISC",
   "dependencies": {
-    "bcode": "0.0.7"
+    "bcode": "0.0.7",
+    "node-lmdb": "^0.6.2"
   }
 }
