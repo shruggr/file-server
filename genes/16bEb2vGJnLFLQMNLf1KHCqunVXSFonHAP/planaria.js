@@ -178,7 +178,7 @@ var initLMDB = function(m) {
 
 module.exports = {
   planaria: '0.0.1',
-  from: 566470,
+  from: 570000,
   name: 'file-server',
   version: '0.0.1',
   description: 'file server for b, c, bcat, and ccat files',
