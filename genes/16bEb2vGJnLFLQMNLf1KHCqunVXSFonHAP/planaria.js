@@ -108,8 +108,7 @@ async function saveBCat(bcat) {
 async function processTransaction(m, txn) {
   const opRet = txn.out.find((out) => out.b0.op == 106);
   if (!opRet) return;
-  let fileData;
-  let bTxId;
+  let bcat;
   try {
     switch (opRet.s1) {
       // case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
@@ -117,7 +116,7 @@ async function processTransaction(m, txn) {
       //   break;
       case '15DHFxWZJT58f9nhyGnsRBqrgwK4W6h4Up':
         console.log(`Processing BCAT: ${txn.tx.h}`);
-        const bcat = {
+        bcat = {
           txId: txn.tx.h,
           chunks: [],
           fileData: {
@@ -148,7 +147,7 @@ async function processTransaction(m, txn) {
         break;
       case '1ChDHzdd1H4wSjgGMHyndZm6qxEDGjqpJL':
         await saveChunk(txn.tx.h, opRet);
-        const {bcat} = await m.state.read({
+        [bcat] = await m.state.read({
           name: 'bcat',
           filter: {find: {chunks: txn.tx.h}}
         });
