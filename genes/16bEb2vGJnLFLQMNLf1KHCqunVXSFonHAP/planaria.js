@@ -136,7 +136,7 @@ async function processTransaction(m, txn) {
         }
 
         console.log(bcat);
-        await m.create({
+        await m.state.create({
           name: 'bcat',
           data: bcat
         }).catch(function (e) {
