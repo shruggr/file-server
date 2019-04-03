@@ -134,6 +134,7 @@ async function processTransaction(m, txn) {
           i++;
         }
 
+        console.log(bcat);
         await m.create({
           name: 'bcat',
           data: bcat
