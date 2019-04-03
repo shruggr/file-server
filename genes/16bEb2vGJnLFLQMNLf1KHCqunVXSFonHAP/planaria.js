@@ -68,9 +68,9 @@ async function saveB(txId, opRet) {
   const hash = await save(buffer);
   await saveMetadata(hash, fileData);
 
-  const filepath = `${m.fs.path}/files/${hash}`;
+  const filepath = `${fspath}/files/${hash}`;
   console.log("Saving B: ", txId)
-  const bPath = `${m.fs.path}/files/${txId}`;
+  const bPath = `${fspath}/files/${txId}`;
   await linkFile(filepath, bPath);
   await saveMetadata(txId, fileData);
 }
@@ -98,9 +98,9 @@ async function saveBCat(bcat) {
   const hash = await save(buffer);
   await saveMetadata(hash, bcat.fileData);
 
-  const filepath = `${m.fs.path}/files/${hash}`;
+  const filepath = `${fspath}/files/${hash}`;
   console.log("Saving BCAT: ", txId)
-  const bPath = `${m.fs.path}/files/${txId}`;
+  const bPath = `${fspath}/files/${txId}`;
   await linkFile(filepath, bPath);
   await saveMetadata(txId, bcat.fileData);
 }
