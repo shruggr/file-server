@@ -105,7 +105,7 @@ async function saveBCat(bcat) {
   console.log("Saving BCAT: ", bcat.txId)
   const bPath = `${fspath}/files/${bcat.txId}`;
   await linkFile(filepath, bPath);
-  await saveMetadata(txId, bcat.fileData);
+  await saveMetadata(bcat.txId, bcat.fileData);
 }
 
 async function processTransaction(m, txn) {
@@ -201,17 +201,29 @@ module.exports = {
   },
   onmempool: async function (m) {
     fspath = m.fs.path;
-    return processTransaction(m, m.input)
+    try {
+      return processTransaction(m, m.input)
+    }
+    catch(e) {
+      console.log(e);
+      process.exit()
+    }
   },
   onblock: async function (m) {
     fspath = m.fs.path;
     console.log(`FSPATH: ${fspath}`);
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
-    for (let input of m.input.block.items) {
-      await processTransaction(m, input);
+    try {
+      for (let input of m.input.block.items) {
+        await processTransaction(m, input);
+      }
+      for (let input of m.input.mempool.items) {
+        await processTransaction(m, input);
+      }
     }
-    for (let input of m.input.mempool.items) {
-      await processTransaction(m, input);
+    catch(e) {
+      console.log(e);
+      process.exit()
     }
   },
   onrestart: async function (m) { }
