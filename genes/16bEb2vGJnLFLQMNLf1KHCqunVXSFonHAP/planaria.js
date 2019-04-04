@@ -115,7 +115,7 @@ async function saveBCat(bcat) {
     buffer = Buffer.concat([buffer, chunk], buffer.length + chunk.length);
   }
   let contentType = await detectFileType(buffer);
-  if(contectType) {
+  if(contentType) {
     bcat.fileData.contentType = contentType;
   }
   const hash = await save(buffer);
