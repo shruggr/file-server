@@ -51,7 +51,7 @@ async function exists(path) {
 async function save(buffer) {
   const hash = crypto.createHash('sha256').update(buffer).digest('hex');
   const filePath = `${fspath}/files/${hash}`;
-  console.log("Saving C: ", hash);
+  console.log("Saving C: ", filePath);
   await writeFile(filePath, buffer);
   return hash;
 }
@@ -201,6 +201,7 @@ module.exports = {
     return processTransaction(m, m.input)
   },
   onblock: async function (m) {
+    fspath = m.fs.path;
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
     for (let input of m.input.block.items) {
       await processTransaction(m, input);
