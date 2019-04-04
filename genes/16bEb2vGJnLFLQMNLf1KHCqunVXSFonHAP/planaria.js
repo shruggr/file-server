@@ -79,7 +79,7 @@ async function saveB(txId, opRet) {
 }
 
 async function saveChunk(txId, opRet) {
-  const filepath = `${fspath}/chunks/${bcat.txId}`;
+  const filepath = `${fspath}/chunks/${txId}`;
   // if(await exists(filepath)) return;
 
   console.log(`Saving Chunk: ${txId}`);
