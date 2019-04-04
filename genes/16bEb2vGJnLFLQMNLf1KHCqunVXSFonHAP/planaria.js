@@ -16,6 +16,7 @@ async function readFile(path) {
 }
 
 async function writeFile(path, buf) {
+  console.log(`Writing ${path}`);
   return new Promise((resolve, reject) => {
     fs.writeFile(path, buf, (err) => {
       if (err && err.code != 'EEXIST') return reject(err);
@@ -25,6 +26,7 @@ async function writeFile(path, buf) {
 }
 
 async function linkFile(existingPath, newPath) {
+  console.log(`Linking ${existingPath} ${newPath}`);
   return new Promise((resolve, reject) => {
     fs.link(existingPath, newPath, (err) => {
       if (err && err.code != 'EEXIST') return reject(err);
@@ -34,6 +36,7 @@ async function linkFile(existingPath, newPath) {
 }
 
 async function saveMetadata(id, fileData) {
+  console.log(`Saving Metadata ${id}`);
   let txn = en.beginTxn();
   txn.putString(db, id, fileData)
   txn.commit();
@@ -201,7 +204,6 @@ module.exports = {
     return processTransaction(m, m.input)
   },
   onblock: async function (m) {
-    fspath = m.fs.path;
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
     for (let input of m.input.block.items) {
       await processTransaction(m, input);
