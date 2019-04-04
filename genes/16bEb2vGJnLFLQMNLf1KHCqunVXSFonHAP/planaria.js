@@ -225,6 +225,7 @@ module.exports = {
     initLMDB(m);
   },
   onmempool: async function (m) {
+    fspath = m.fs.path;
     try {
       return processTransaction(m, m.input)
     }
@@ -234,6 +235,7 @@ module.exports = {
     }
   },
   onblock: async function (m) {
+    fspath = m.fs.path;
     console.log(`FSPATH: ${fspath}`);
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
     try {
