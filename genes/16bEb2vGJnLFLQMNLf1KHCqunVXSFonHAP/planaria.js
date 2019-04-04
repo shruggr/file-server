@@ -39,7 +39,7 @@ async function linkFile(existingPath, newPath) {
 async function saveMetadata(id, fileData) {
   console.log(`Saving Metadata ${id}`);
   let txn = en.beginTxn();
-  txn.putString(db, id, fileData)
+  txn.putString(db, id, JSON.stringify(fileData));
   txn.commit();
 }
 

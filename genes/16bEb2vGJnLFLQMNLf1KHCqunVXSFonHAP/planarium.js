@@ -46,7 +46,7 @@ module.exports = {
           let filename = `${filepath}/${req.params.id}`;
 
           let txn = en.beginTxn()
-          let fileData = txn.getString(db, req.params.id)
+          let fileData = JSON.parse(txn.getString(db, req.params.id) || '{}');
           txn.commit()
           console.log(fileData);
           if (fileData && fileData.contentType) {
