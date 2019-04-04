@@ -48,7 +48,7 @@ module.exports = {
           }
           fs.stat(filename, function(err, stat) {
             if(err) {
-              res.status(404).send('Not Found');
+              return res.status(404).send('Not Found');
             }
 
             if (stat && stat.size) {
