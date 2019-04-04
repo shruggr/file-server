@@ -195,6 +195,7 @@ module.exports = {
   },
   oncreate: async function (m) {
     fspath = m.fs.path;
+    console.log(`FSPATH: ${m.fs.path}`);
     await mkdir(m.fs.path + "/chunks");
     await mkdir(m.fs.path + "/files");
     await mkdir(m.fs.path + "/lmdb");
