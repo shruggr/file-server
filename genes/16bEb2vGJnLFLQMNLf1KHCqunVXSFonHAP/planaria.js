@@ -1,6 +1,7 @@
 const mkdir = require('make-dir');
 const fs = require('fs');
 const crypto = require('crypto');
+const fileType = require('file-type');
 const lmdb = require('node-lmdb');
 let en = new lmdb.Env();
 let db;
@@ -42,6 +43,13 @@ async function saveMetadata(id, fileData) {
   txn.commit();
 }
 
+async function detectFileType(buffer) {
+  try {
+    let detection = fileType(buffer)
+    if (detection) return detection.mime;
+  } catch (e) {}
+}
+
 async function exists(path) {
   return new Promise((resolve) => {
     fs.access(path, fs.constants.F_OK, (err) => {
@@ -66,9 +74,10 @@ async function saveB(txId, opRet) {
   if(typeof data !== 'string') return;
   buffer = Buffer.from(data, 'base64');
 
+  let contentType = await detectFileType(buffer);
   const fileData = {
     info: 'b',
-    contentType: opRet.s3,
+    contentType: contentType || opRet.s3,
     encoding: opRet.s4,
     filename: opRet.s5
   };
@@ -105,7 +114,10 @@ async function saveBCat(bcat) {
     let chunk = await readFile(`${fspath}/chunks/${chunkId}`);
     buffer = Buffer.concat([buffer, chunk], buffer.length + chunk.length);
   }
-
+  let contentType = await detectFileType(buffer);
+  if(contectType) {
+    bcat.fileData.contentType = contentType;
+  }
   const hash = await save(buffer);
   await saveMetadata(hash, bcat.fileData);
 
