@@ -214,13 +214,17 @@ module.exports = {
     }
   },
   oncreate: async function (m) {
+    fspath = m.fs.path;
     await mkdir(m.fs.path + "/chunks");
     await mkdir(m.fs.path + "/files");
     await mkdir(m.fs.path + "/lmdb");
     initLMDB(m);
   },
-  onmempool: async function (m) {
+  onrestart: async function(m) {
     fspath = m.fs.path;
+    initLMDB(m);
+  },
+  onmempool: async function (m) {
     try {
       return processTransaction(m, m.input)
     }
@@ -230,7 +234,6 @@ module.exports = {
     }
   },
   onblock: async function (m) {
-    fspath = m.fs.path;
     console.log(`FSPATH: ${fspath}`);
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
     try {
