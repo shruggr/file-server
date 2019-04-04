@@ -36,10 +36,10 @@ async function linkFile(existingPath, newPath) {
   });
 }
 
-async function saveMetadata(id, fileData) {
+async function saveMetadata(id, contentType) {
   console.log(`Saving Metadata ${id}`);
   let txn = en.beginTxn();
-  txn.putString(db, id, JSON.stringify(fileData));
+  txn.putString(db, id, contentType);
   txn.commit();
 }
 
@@ -82,13 +82,13 @@ async function saveB(txId, opRet) {
     filename: opRet.s5
   };
   const hash = await save(buffer);
-  await saveMetadata(hash, fileData);
+  await saveMetadata(hash, fileData.contentType);
 
   const filepath = `${fspath}/files/${hash}`;
   console.log("Saving B: ", txId)
   const bPath = `${fspath}/files/${txId}`;
   await linkFile(filepath, bPath);
-  await saveMetadata(txId, fileData);
+  await saveMetadata(txId, fileData.contentType);
 }
 
 async function saveChunk(txId, opRet) {
@@ -119,13 +119,13 @@ async function saveBCat(bcat) {
     bcat.fileData.contentType = contentType;
   }
   const hash = await save(buffer);
-  await saveMetadata(hash, bcat.fileData);
+  await saveMetadata(hash, bcat.fileData.contentType);
 
   const filepath = `${fspath}/files/${hash}`;
   console.log("Saving BCAT: ", bcat.txId)
   const bPath = `${fspath}/files/${bcat.txId}`;
   await linkFile(filepath, bPath);
-  await saveMetadata(bcat.txId, bcat.fileData);
+  await saveMetadata(bcat.txId, bcat.fileData.contentType);
 }
 
 async function processTransaction(m, txn) {
@@ -197,7 +197,7 @@ var initLMDB = function(m) {
     mapSize: 2*1024*1024*1024,
     maxDbs: 3
   });
-  db = en.openDbi({ name: "filedata", create: true })
+  db = en.openDbi({ name: "mimetype", create: true })
 }
 
 module.exports = {

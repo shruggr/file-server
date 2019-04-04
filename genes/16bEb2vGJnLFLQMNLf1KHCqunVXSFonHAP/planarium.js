@@ -24,17 +24,11 @@ module.exports = {
       oncreate: async function (m) {
         filepath = `${m.fs.path}/files`;
 
-        // [1] LMDB Folder
-        //  a. set global dbpath and filepath
         dbpath = m.fs.path + "/lmdb"
-        //  b. create a directory at dbpath
         await mkdir(dbpath)
-        //  c. Connect to DB
         en.open({ path: dbpath, mapSize: 2*1024*1024*1024, maxDbs: 3 });
-        db = en.openDbi({ name: "filedata", create: true })
+        db = en.openDbi({ name: "mimetype", create: true })
 
-        // [2] C:// Folder
-        //  a. m.fs.path contains the path to the current state machine's root filesystem
         filepath = m.fs.path + "/files/"
       },
       routes: {
@@ -46,11 +40,11 @@ module.exports = {
           let filename = `${filepath}/${req.params.id}`;
 
           let txn = en.beginTxn()
-          let fileData = JSON.parse(txn.getString(db, req.params.id) || '{}');
+          let contentType = txn.getString(db, req.params.id);
           txn.commit()
-          console.log(fileData);
-          if (fileData && fileData.contentType) {
-            res.setHeader('Content-Type', fileData.contentType);
+          console.log(contentType);
+          if (contentType) {
+            res.setHeader('Content-Type', contentType);
           }
           fs.stat(filename, function(err, stat) {
             if(err) {
