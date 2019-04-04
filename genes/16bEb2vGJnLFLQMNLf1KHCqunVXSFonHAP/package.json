@@ -1,6 +1,6 @@
 {
-  "name": "planarian",
-  "version": "0.0.0",
+  "name": "planarian file-server",
+  "version": "0.0.2",
   "description": "Stem cell",
   "main": "planaria.js",
   "license": "ISC",

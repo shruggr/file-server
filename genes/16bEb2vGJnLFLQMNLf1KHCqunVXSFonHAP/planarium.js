@@ -9,7 +9,7 @@ let dbpath;
 let db;
 
 module.exports = {
-  planarium: '0.0.1',
+  planarium: '0.0.2',
   query: {
     web: {
       v: 3,
