@@ -77,9 +77,9 @@ async function saveB(txId, opRet) {
 
 async function saveChunk(txId, opRet) {
   const filepath = `${fspath}/chunks/${bcat.txId}`;
-  if(await exists(filepath)) return;
+  // if(await exists(filepath)) return;
 
-  console.log(`Processing Chunk: ${txId}`);
+  console.log(`Saving Chunk: ${txId}`);
   const buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
   await writeFile(filepath, buffer);
 }
@@ -111,9 +111,9 @@ async function processTransaction(m, txn) {
   let bcat;
   try {
     switch (opRet.s1) {
-      // case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
-      //   return saveB(txn.tx.h, opRet);
-      //   break;
+      case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
+        return saveB(txn.tx.h, opRet);
+        break;
       case '15DHFxWZJT58f9nhyGnsRBqrgwK4W6h4Up':
         console.log(`Processing BCAT: ${txn.tx.h}`);
         bcat = {
@@ -130,7 +130,7 @@ async function processTransaction(m, txn) {
         let i = 7;
         let chunkId;
         while (chunkId = opRet[`h${i}`]) {
-          if(!/^[0-9A-Fa-f]{64}$/g.test(chunkId)) return;
+          // if(!/^[0-9A-Fa-f]{64}$/g.test(chunkId)) return;
           bcat.chunks.push(chunkId);
           i++;
         }
