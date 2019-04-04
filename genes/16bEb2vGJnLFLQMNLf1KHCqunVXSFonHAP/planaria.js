@@ -200,6 +200,7 @@ module.exports = {
     await mkdir(m.fs.path + "/files");
     await mkdir(m.fs.path + "/lmdb");
     initLMDB(m);
+    process.exit();
   },
   onmempool: async function (m) {
     return processTransaction(m, m.input)
