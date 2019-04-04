@@ -148,6 +148,7 @@ async function processTransaction(m, txn) {
         return saveBCat(bcat);
         break;
       case '1ChDHzdd1H4wSjgGMHyndZm6qxEDGjqpJL':
+        console.log(`Processing Chunk: ${txn.tx.h}`);
         await saveChunk(txn.tx.h, opRet);
         [bcat] = await m.state.read({
           name: 'bcat',
