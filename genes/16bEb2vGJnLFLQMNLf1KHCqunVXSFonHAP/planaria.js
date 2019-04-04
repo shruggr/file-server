@@ -68,7 +68,7 @@ async function save(buffer) {
 }
 
 async function saveB(txId, opRet) {
-  console.log(`Processing B: ${txId}`);
+  if(await exists(`${fspath}/file/${txId}`)) return;
 
   const data = opRet.lb2 || opRet.b2 || '';
   if(typeof data !== 'string') return;
@@ -93,7 +93,7 @@ async function saveB(txId, opRet) {
 
 async function saveChunk(txId, opRet) {
   const filepath = `${fspath}/chunks/${txId}`;
-  // if(await exists(filepath)) return;
+  if(await exists(filepath)) return;
 
   console.log(`Saving Chunk: ${txId}`);
   const data = opRet.lb2 || opRet.b2 || '';
@@ -135,6 +135,7 @@ async function processTransaction(m, txn) {
   try {
     switch (opRet.s1) {
       case '19HxigV4QyBv3tHpQVcUEQyq1pzZVdoAut':
+        console.log(`Processing B: ${txn.tx.h}`);
         return saveB(txn.tx.h, opRet);
         break;
       case '15DHFxWZJT58f9nhyGnsRBqrgwK4W6h4Up':
@@ -167,7 +168,6 @@ async function processTransaction(m, txn) {
             process.exit();
           }
         });
-        console.log('Saving BCAT index: ' + txn.tx.h);
         return saveBCat(bcat);
         break;
       case '1ChDHzdd1H4wSjgGMHyndZm6qxEDGjqpJL':
