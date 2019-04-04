@@ -185,7 +185,7 @@ module.exports = {
   from: 570000,
   name: 'file-server',
   version: '0.0.1',
-  description: 'file server for b, c, bcat, and ccat files',
+  description: 'file server for b, c, and bcat files',
   address: '16bEb2vGJnLFLQMNLf1KHCqunVXSFonHAP',
   index: {
     bcat: {
@@ -205,6 +205,7 @@ module.exports = {
   },
   onblock: async function (m) {
     fspath = m.fs.path;
+    console.log(`FSPATH: ${fspath}`);
     console.log("## onblock", "block height = ", m.input.block.info.height, "block hash =", m.input.block.info.hash, "txs =", m.input.block.info.tx.length);
     for (let input of m.input.block.items) {
       await processTransaction(m, input);
