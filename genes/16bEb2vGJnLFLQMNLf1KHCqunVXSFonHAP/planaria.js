@@ -61,7 +61,11 @@ async function save(buffer) {
 
 async function saveB(txId, opRet) {
   console.log(`Processing B: ${txId}`);
-  buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
+
+  const data = opRet.lb2 || opRet.b2 || '';
+  if(typeof data !== 'string') return;
+  buffer = Buffer.from(data, 'base64');
+
   const fileData = {
     info: 'b',
     contentType: opRet.s3,
@@ -83,7 +87,10 @@ async function saveChunk(txId, opRet) {
   // if(await exists(filepath)) return;
 
   console.log(`Saving Chunk: ${txId}`);
-  const buffer = Buffer.from(opRet.lb2 || opRet.b2 || '', 'base64');
+  const data = opRet.lb2 || opRet.b2 || '';
+  if(typeof data !== 'string') return;
+  buffer = Buffer.from(data, 'base64');
+
   await writeFile(filepath, buffer);
 }
 
