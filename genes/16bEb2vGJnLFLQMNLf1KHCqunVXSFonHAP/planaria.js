@@ -95,7 +95,7 @@ async function saveBCat(bcat) {
 
   let buffer = Buffer.alloc(0);
   for(let chunkId of bcat.chunks) {
-    // buffer = buffer.concat(await readFile(`${fspath}/chunks/${chunkId}`));
+    buffer = buffer.concat(await readFile(`${fspath}/chunks/${chunkId}`));
   }
 
   const hash = await save(buffer);
