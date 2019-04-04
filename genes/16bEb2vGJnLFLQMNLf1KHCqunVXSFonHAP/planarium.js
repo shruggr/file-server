@@ -48,6 +48,7 @@ module.exports = {
           let txn = en.beginTxn()
           let fileData = txn.getString(db, req.params.id)
           txn.commit()
+          console.log(fileData);
           if (fileData && fileData.contentType) {
             res.setHeader('Content-Type', fileData.contentType);
           }
