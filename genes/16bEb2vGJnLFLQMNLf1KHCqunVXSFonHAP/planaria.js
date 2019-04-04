@@ -102,8 +102,8 @@ async function saveBCat(bcat) {
   await saveMetadata(hash, bcat.fileData);
 
   const filepath = `${fspath}/files/${hash}`;
-  console.log("Saving BCAT: ", txId)
-  const bPath = `${fspath}/files/${txId}`;
+  console.log("Saving BCAT: ", bcat.txId)
+  const bPath = `${fspath}/files/${bcat.txId}`;
   await linkFile(filepath, bPath);
   await saveMetadata(txId, bcat.fileData);
 }
