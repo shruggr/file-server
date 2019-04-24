@@ -85,6 +85,7 @@ async function saveB(txId, opRet) {
   if (await fs.pathExists(`${fspath}/b/${txId}`)) return;
 
   const data = opRet.lb2 || opRet.b2 || '';
+  if(typeof data !== 'string') return;
   buffer = Buffer.from(data, 'base64');
 
   const fileData = {
