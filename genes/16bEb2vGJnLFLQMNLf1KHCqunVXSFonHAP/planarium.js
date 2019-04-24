@@ -54,25 +54,25 @@ module.exports = {
         db = en.openDbi({ name: "mimetype", create: true })
       },
       routes: {
-        "c/:hash": async function (req, res) {
+        "/c/:hash": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
           serveFile(`c/${req.params.hash}`, res);
         },
-        "b/:txId": async function (req, res) {
+        "/b/:txId": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
           serveFile(`b/${req.params.txId}`, res);
         },
-        "bcat/:txId": async function (req, res) {
+        "/bcat/:txId": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
           serveFile(`bcat/${req.params.txId}`, res);
         },
-        ":owner/:path": async function (req, res) {
+        "/:owner/:path": async function (req, res) {
           serveFile(`bitcom/${owner}/${req.params.path}`, res);
         }
       },
