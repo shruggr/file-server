@@ -123,7 +123,7 @@ async function saveBCat(bcat) {
 
   console.log("Saving BCAT: ", bcat.txId)
   for (let chunkId of bcat.chunks) {
-    await streamFile(destPath, `${fspath}/chunks/${chunkId}`, 'a')
+    await streamFile(destPath, `${fspath}/chunks/${chunkId}`, {flags: 'a'})
   }
 
   const contentType = bcat.fileData.contentType || await detectFileType(destPath)
