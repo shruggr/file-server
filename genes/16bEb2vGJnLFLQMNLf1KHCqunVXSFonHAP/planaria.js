@@ -116,7 +116,7 @@ async function saveChunk(txId, opRet) {
 
 async function saveBCat(bcat) {
   const destPath = `${fspath}/bcat/${bcat.txId}`;
-  if (await fs.pathExists(destPath)) return;
+  if (!bcat.chunks.length || await fs.pathExists(destPath)) return;
   for (let chunkId of bcat.chunks) {
     if (! await fs.pathExists(`${fspath}/chunks/${chunkId}`)) return;
   }
