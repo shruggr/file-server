@@ -4,12 +4,36 @@ const mkdir = require('make-dir');
 const lmdb = require('node-lmdb');
 
 var en = new lmdb.Env();
-let filepath;
+let fspath;
 let dbpath;
 let db;
 
+async function serveFile(path, req, res) {
+  let txn = en.beginTxn()
+  let contentType = txn.getString(db, req.params.id);
+  txn.commit()
+  console.log(contentType);
+  if (contentType) {
+    res.setHeader('Content-Type', contentType);
+  }
+  fs.stat(filename, function(err, stat) {
+    if(err) {
+      return res.status(404).send('Not Found');
+    }
+
+    if (stat && stat.size) {
+      res.setHeader('Content-Length', stat.size)
+    }
+    // 4. Send file
+    let filestream = fs.createReadStream(filename)
+    filestream.on("error", function(e) {
+      res.status(500).send(e.message);
+    });
+    filestream.pipe(res);
+  })
+}
+
 module.exports = {
-  planarium: '0.0.2',
   query: {
     web: {
       v: 3,
@@ -22,45 +46,33 @@ module.exports = {
       },
       concurrency: { aggregate: 7 },
       oncreate: async function (m) {
-        filepath = `${m.fs.path}/files`;
-
+        fspath = m.fs.path
         dbpath = m.fs.path + "/lmdb"
         await mkdir(dbpath)
         en.open({ path: dbpath, mapSize: 2*1024*1024*1024, maxDbs: 3 });
         db = en.openDbi({ name: "mimetype", create: true })
-
-        filepath = m.fs.path + "/files/"
       },
       routes: {
-        "/:id": async function (req, res) {
+        "c/:hash": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
-
-          let filename = `${filepath}/${req.params.id}`;
-
-          let txn = en.beginTxn()
-          let contentType = txn.getString(db, req.params.id);
-          txn.commit()
-          console.log(contentType);
-          if (contentType) {
-            res.setHeader('Content-Type', contentType);
-          }
-          fs.stat(filename, function(err, stat) {
-            if(err) {
-              return res.status(404).send('Not Found');
-            }
-
-            if (stat && stat.size) {
-              res.setHeader('Content-Length', stat.size)
-            }
-            // 4. Send file
-            let filestream = fs.createReadStream(filename)
-            filestream.on("error", function(e) {
-              res.status(500).send(e.message);
-            });
-            filestream.pipe(res);
-          })
+          serveFile(`${fspath}/c/${req.params.hash}`)
+        },
+        "b/:txId": async function (req, res) {
+          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
+            return res.status(400).send('Invalid id');
+          };
+          serveFile(`${fspath}/b/${req.params.txId}`)
+        },
+        "bcat/:txId": async function (req, res) {
+          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
+            return res.status(400).send('Invalid id');
+          };
+          serveFile(`${fspath}/bcat/${req.params.txId}`)
+        },
+        ":owner/:path": async function (req, res) {
+          serveFile(`${fspath}/${owner}/${req.params.path}`)
         }
       },
       log: true
