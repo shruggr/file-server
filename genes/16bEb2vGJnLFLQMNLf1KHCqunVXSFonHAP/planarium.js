@@ -8,14 +8,15 @@ let fspath;
 let dbpath;
 let db;
 
-async function serveFile(path, req, res) {
+async function serveFile(path, res) {
   let txn = en.beginTxn()
-  let contentType = txn.getString(db, req.params.id);
+  let contentType = txn.getString(db, path);
   txn.commit()
   console.log(contentType);
   if (contentType) {
     res.setHeader('Content-Type', contentType);
   }
+  const filename = `${fspath}/${path}`;
   fs.stat(filename, function(err, stat) {
     if(err) {
       return res.status(404).send('Not Found');
@@ -57,22 +58,22 @@ module.exports = {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
-          serveFile(`${fspath}/c/${req.params.hash}`)
+          serveFile(`c/${req.params.hash}`, res);
         },
         "b/:txId": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
-          serveFile(`${fspath}/b/${req.params.txId}`)
+          serveFile(`b/${req.params.txId}`, res);
         },
         "bcat/:txId": async function (req, res) {
           if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
             return res.status(400).send('Invalid id');
           };
-          serveFile(`${fspath}/bcat/${req.params.txId}`)
+          serveFile(`bcat/${req.params.txId}`, res);
         },
         ":owner/:path": async function (req, res) {
-          serveFile(`${fspath}/${owner}/${req.params.path}`)
+          serveFile(`bitcom/${owner}/${req.params.path}`, res);
         }
       },
       log: true

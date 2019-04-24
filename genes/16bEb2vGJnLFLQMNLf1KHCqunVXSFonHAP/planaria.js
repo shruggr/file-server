@@ -136,7 +136,7 @@ async function saveBitcom(txId, owner, opRet) {
   const path = opRet.s5;
   if (!path || path.indexOf('..') > -1) return;
 
-  const fullpath = `${fspath}/${owner}/${path}`;
+  const fullpath = `${fspath}/bitcom/${owner}/${path}`;
   await fs.ensureDir(fullpath.substring(0, fullpath.lastIndexOf('/')));
 
   switch (opRet.s2) {
@@ -146,6 +146,7 @@ async function saveBitcom(txId, owner, opRet) {
       console.log("Saving Bitcom echo: ", txId)
       if (opRet.s4 == '>' || opRet.s4 == 'to') {
         await fs.writeFile(fullpath, Buffer.from(data));
+        await saveMetadata(`b/${opRet}`, fileData.contentType);
       }
       else if (opRet.s4 === '>>') {
         await fs.appendFile(fullpath, Buffer.from(data));
