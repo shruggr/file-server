@@ -267,7 +267,7 @@ var initLMDB = function (m) {
 module.exports = {
   from: 570000,
   name: 'file-server',
-  version: '0.0.2',
+  version: '0.0.3',
   description: 'file server for b, bcat, and bitcom files and associated C hashes',
   address: '16bEb2vGJnLFLQMNLf1KHCqunVXSFonHAP',
   index: {
