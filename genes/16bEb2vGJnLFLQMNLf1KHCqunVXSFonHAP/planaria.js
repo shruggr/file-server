@@ -147,7 +147,6 @@ async function saveBitcom(txId, owner, opRet) {
       console.log("Saving Bitcom echo: ", txId)
       if (opRet.s4 == '>' || opRet.s4 == 'to') {
         await fs.writeFile(fullpath, Buffer.from(data));
-        await saveMetadata(`b/${opRet}`, fileData.contentType);
       }
       else if (opRet.s4 === '>>') {
         await fs.appendFile(fullpath, Buffer.from(data));
@@ -155,6 +154,7 @@ async function saveBitcom(txId, owner, opRet) {
 
       break;
     case 'cat':
+      // TODO: copy content type from source file.
       let sourceFile;
       const ref = new URL(opRet.s3);
       if (ref.protocol == 'b') {
