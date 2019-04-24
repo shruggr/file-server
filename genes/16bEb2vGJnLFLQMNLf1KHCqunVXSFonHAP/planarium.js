@@ -55,20 +55,20 @@ module.exports = {
       },
       routes: {
         "/c/:hash": async function (req, res) {
-          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
-            return res.status(400).send('Invalid id');
+          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.hash)) {
+            return res.status(400).send('Invalid hash');
           };
           serveFile(`c/${req.params.hash}`, res);
         },
         "/b/:txId": async function (req, res) {
-          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
-            return res.status(400).send('Invalid id');
+          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.txId)) {
+            return res.status(400).send('Invalid txId');
           };
           serveFile(`b/${req.params.txId}`, res);
         },
         "/bcat/:txId": async function (req, res) {
-          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.id)) {
-            return res.status(400).send('Invalid id');
+          if (!/^[0-9A-Fa-f]{64}$/g.test(req.params.txId)) {
+            return res.status(400).send('Invalid txId');
           };
           serveFile(`bcat/${req.params.txId}`, res);
         },
