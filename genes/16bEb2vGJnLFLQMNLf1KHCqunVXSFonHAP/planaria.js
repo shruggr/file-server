@@ -243,7 +243,7 @@ async function processTransaction(m, txn) {
 
       case '$':
         console.log(`Processing Bitcom: ${txn.tx.h}`);
-        saveBitcom(txn.in[0].e.a, opRet);
+        saveBitcom(txn.tx.h, txn.in[0].e.a, opRet);
         break;
       default:
         return;
